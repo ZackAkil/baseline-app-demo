@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kjuber Power Comparison</title>
+    <style>
+        /* --- CSS STYLES START --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column; /* Allow content to stack vertically */
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333; /* Default text color */
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+            margin-top: 20px; /* Add some space from the top of the viewport */
+            margin-bottom: 20px; /* Space at the bottom */
+        }
+
+        h1 {
+            color: #1a202c; /* Darker heading */
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            color: #2d3748; /* Darker heading for sections */
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        p {
+            color: #4a5568; /* Slightly lighter body text */
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .buttons-container {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+        }
+
+        button {
+            background-color: #4c51bf; /* Deeper blue for buttons */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            min-width: 180px;
+            box-shadow: 0 4px 10px rgba(76, 81, 191, 0.2);
+        }
+
+        button:hover {
+            background-color: #3c429c;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(76, 81, 191, 0.3);
+        }
+
+        button:active {
+            background-color: #2e337a;
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(76, 81, 191, 0.2);
+        }
+
+        .comparison-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        .device-info {
+            background-color: #edf2f7; /* Light grey background */
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 280px; /* Ensure a minimum width for each info box */
+            max-width: 48%; /* Adjust for gap and responsiveness */
+            box-sizing: border-box;
+            border: 1px solid #e2e8f0; /* Subtle border */
+            display: flex; /* Use flexbox for internal layout */
+            flex-direction: column; /* Stack content vertically */
+            align-items: center; /* Center content horizontally */
+        }
+
+        @media (max-width: 768px) {
+            .comparison-display {
+                flex-direction: column;
+                align-items: center;
+            }
+            .device-info {
+                max-width: 90%; /* Take more width on small screens */
+                margin-bottom: 20px; /* Space between stacked elements */
+            }
+        }
+
+        .device-info h2 {
+            color: #2d3748; /* Darker heading for info boxes */
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        .score-display {
+            font-size: 2.8em;
+            font-weight: bold;
+            color: #38a169; /* Vibrant green for scores */
+            margin-bottom: 20px;
+            height: 1.2em; /* Reserve space to prevent layout shifts */
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 5px;
+        }
+
+        .score {
+            display: inline-block; /* For the scrolling number effect */
+            min-width: 60px; /* Prevent text jumping */
+            text-align: right; /* Align number to right for consistency */
+        }
+
+        .unit {
+            font-size: 0.5em; /* Smaller unit text */
+            color: #718096;
+            vertical-align: super;
+            font-weight: normal;
+        }
+
+        .bar-chart-container {
+            background-color: #cbd5e0; /* Light grey for empty bar */
+            border-radius: 5px;
+            height: 30px;
+            margin-top: 15px;
+            overflow: hidden; /* Hide overflow during animation */
+            border: 1px solid #a0aec0; /* Border for bar container */
+            width: 100%; /* Make bar container take full width of device-info */
+        }
+
+        .bar {
+            background-image: linear-gradient(to right, #48bb78, #38a169); /* Green gradient for bar */
+            height: 100%;
+            width: 0%; /* Starts at 0, animates to score percentage */
+            border-radius: 5px;
+            transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1); /* Smooth animation */
+        }
+
+        .insight {
+            margin-top: 50px;
+            font-style: italic;
+            color: #666;
+            font-size: 1.05em;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+
+        /* Styles for the new hidden triple comparison section */
+        #triple-comparison-section {
+            background-color: #e6eef5; /* Slightly different background for distinction */
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-top: 40px;
+            border: 1px solid #c7d2e0;
+            display: none; /* Initially hidden */
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+        }
+        #triple-comparison-section h2 {
+            margin-top: 0;
+            font-size: 2em;
+            color: #2b6cb0; /* Blue heading for this section */
+        }
+
+        /* Button to toggle the hidden section */
+        #show-triple-comparison-btn {
+            background-color: #2b6cb0; /* Blue toggle button */
+            margin-top: 30px;
+            margin-bottom: 20px;
+            display: inline-block; /* Ensure it's centered */
+            font-size: 1.1em; /* Slightly smaller for multiple buttons */
+            padding: 12px 25px;
+        }
+        #show-triple-comparison-btn:hover {
+            background-color: #2c5282;
+            transform: translateY(-3px);
+        }
+
+        /* Styles for the checkbox control */
+        .controls-container {
+            margin: 20px auto;
+            padding: 15px 30px;
+            background-color: #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            color: #2d3748;
+            max-width: 900px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .controls-container input[type="checkbox"] {
+            transform: scale(1.5); /* Make checkbox larger */
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        /* Image Visualization specific styles within device-info */
+        .image-wrapper {
+            margin-top: 20px; /* Space above the image */
+            width: 100%; /* Take full width of parent */
+            max-width: 250px; /* Limit image size for aesthetics */
+            display: flex; /* Hide by default, controlled by JS */
+            flex-direction: column;
+            align-items: center;
+            gap: 8px; /* Space between image and label */
+        }
+        .image-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            object-fit: cover; /* Ensure image covers the area */
+            border: 1px solid #e2e8f0;
+            transition: filter 0.5s ease-out; /* Smooth transition for blur */
+        }
+        .image-wrapper .score-label {
+            font-size: 0.9em;
+            color: #6a737d;
+        }
+        /* --- CSS STYLES END --- */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kjuber Power Comparer</h1>
+        <p>Click a button to see its Kjuber Power score and compare!</p>
+    </div>
+
+    <!-- Checkbox control for image visualization -->
+    <div class="controls-container">
+        <input type="checkbox" id="enable-image-vis-checkbox">
+        <label for="enable-image-vis-checkbox">Enable Image Visualization</label>
+    </div>
+
+    <div class="container">
+        <h2>Dual Kjuber Comparison</h2>
+        <div class="buttons-container">
+            <button id="buttonA">Device Alpha</button>
+            <button id="buttonB">Device Beta</button>
+        </div>
+
+        <div class="comparison-display">
+            <div class="device-info">
+                <h2>Device Alpha Score:</h2>
+                <div class="score-display">
+                    <span id="scoreA" class="score">0</span> <span class="unit">kjubers</span>
+                </div>
+                <div class="bar-chart-container">
+                    <div id="barA" class="bar"></div>
+                </div>
+                <!-- Image visualization for Device A -->
+                <div class="image-wrapper" id="imageWrapperA">
+                    <h3>Visual: Alpha</h3>
+                    <img id="imageA" src="https://placehold.co/400x300/a0aec0/ffffff?text=TEST+IMAGE+A" alt="Test Image for Device Alpha" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Load+Error';">
+                    <span class="score-label">Kjubers: <span id="imageScoreA">0</span></span>
+                </div>
+            </div>
+
+            <div class="device-info">
+                <h2>Device Beta Score:</h2>
+                <div class="score-display">
+                    <span id="scoreB" class="score">0</span> <span class="unit">kjubers</span>
+                </div>
+                <div class="bar-chart-container">
+                    <div id="barB" class="bar"></div>
+                </div>
+                <!-- Image visualization for Device B -->
+                <div class="image-wrapper" id="imageWrapperB">
+                    <h3>Visual: Beta</h3>
+                    <img id="imageB" src="https://placehold.co/400x300/a0aec0/ffffff?text=TEST+IMAGE+B" alt="Test Image for Device Beta" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Load+Error';">
+                    <span class="score-label">Kjubers: <span id="imageScoreB">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <p class="insight">Notice how much clearer the difference becomes when you see the two scores side-by-side and visually represented!</p>
+    </div>
+
+    <!-- Button to show the triple comparison section -->
+    <div class="container">
+        <button id="show-triple-comparison-btn">Show Advanced Comparison</button>
+    </div>
+
+    <!-- The new, initially hidden triple comparison section -->
+    <div id="triple-comparison-section" class="container">
+        <h2>Triple Kjuber Comparison</h2>
+        <p>Explore the power of three different technologies: Low, Medium, and High performance.</p>
+
+        <div class="buttons-container">
+            <button id="buttonX">Device X</button>
+            <button id="buttonY">Device Y</button>
+            <button id="buttonZ">Device Z</button>
+        </div>
+
+        <div class="comparison-display">
+            <div class="device-info">
+                <h2>Device X Score:</h2>
+                <div class="score-display">
+                    <span id="scoreX" class="score">0</span> <span class="unit">kjubers</span>
+                </div>
+                <div class="bar-chart-container">
+                    <div id="barX" class="bar"></div>
+                </div>
+                <!-- Image visualization for Device X -->
+                <div class="image-wrapper" id="imageWrapperX">
+                    <h3>Visual: X</h3>
+                    <img id="imageX" src="https://placehold.co/400x300/a0aec0/ffffff?text=TEST+IMAGE+X" alt="Test Image for Device X" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Load+Error';">
+                    <span class="score-label">Kjubers: <span id="imageScoreX">0</span></span>
+                </div>
+            </div>
+
+            <div class="device-info">
+                <h2>Device Y Score:</h2>
+                <div class="score-display">
+                    <span id="scoreY" class="score">0</span> <span class="unit">kjubers</span>
+                </div>
+                <div class="bar-chart-container">
+                    <div id="barY" class="bar"></div>
+                </div>
+                <!-- Image visualization for Device Y -->
+                <div class="image-wrapper" id="imageWrapperY">
+                    <h3>Visual: Y</h3>
+                    <img id="imageY" src="https://placehold.co/400x300/a0aec0/ffffff?text=TEST+IMAGE+Y" alt="Test Image for Device Y" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Load+Error';">
+                    <span class="score-label">Kjubers: <span id="imageScoreY">0</span></span>
+                </div>
+            </div>
+
+            <div class="device-info">
+                <h2>Device Z Score:</h2>
+                <div class="score-display">
+                    <span id="scoreZ" class="score">0</span> <span class="unit">kjubers</span>
+                </div>
+                <div class="bar-chart-container">
+                    <div id="barZ" class="bar"></div>
+                </div>
+                <!-- Image visualization for Device Z -->
+                <div class="image-wrapper" id="imageWrapperZ">
+                    <h3>Visual: Z</h3>
+                    <img id="imageZ" src="https://placehold.co/400x300/a0aec0/ffffff?text=TEST+IMAGE+Z" alt="Test Image for Device Z" onerror="this.onerror=null;this.src='https://placehold.co/400x300/cccccc/333333?text=Image+Load+Error';">
+                    <span class="score-label">Kjubers: <span id="imageScoreZ">0</span></span>
+                </div>
+            </div>
+        </div>
+        <p class="insight">Observe how the greater number of options and their varying performance levels emphasize the dramatic differences!</p>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT START --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elements for the initial dual comparison
+            const scoreAElement = document.getElementById('scoreA');
+            const scoreBElement = document.getElementById('scoreB');
+            const barA = document.getElementById('barA');
+            const barB = document.getElementById('barB');
+
+            // Elements for the new triple comparison section
+            const showTripleComparisonBtn = document.getElementById('show-triple-comparison-btn');
+            const tripleComparisonSection = document.getElementById('triple-comparison-section');
+            const scoreXElement = document.getElementById('scoreX');
+            const scoreYElement = document.getElementById('scoreY');
+            const scoreZElement = document.getElementById('scoreZ');
+            const barX = document.getElementById('barX');
+            const barY = document.getElementById('barY');
+            const barZ = document.getElementById('barZ');
+
+            // Checkbox for image visualization
+            const enableImageVisCheckbox = document.getElementById('enable-image-vis-checkbox');
+
+            // References to all image elements and their score labels and wrappers
+            const imageElements = {
+                deviceA: { img: document.getElementById('imageA'), scoreLabel: document.getElementById('imageScoreA'), wrapper: document.getElementById('imageWrapperA') },
+                deviceB: { img: document.getElementById('imageB'), scoreLabel: document.getElementById('imageScoreB'), wrapper: document.getElementById('imageWrapperB') },
+                deviceX: { img: document.getElementById('imageX'), scoreLabel: document.getElementById('imageScoreX'), wrapper: document.getElementById('imageWrapperX') },
+                deviceY: { img: document.getElementById('imageY'), scoreLabel: document.getElementById('imageScoreY'), wrapper: document.getElementById('imageWrapperY') },
+                deviceZ: { img: document.getElementById('imageZ'), scoreLabel: document.getElementById('imageScoreZ'), wrapper: document.getElementById('imageWrapperZ') }
+            };
+
+            // Define the target scores that each button reveals
+            // These are the "true" scores. currentScores will be updated as buttons are clicked.
+            const targetScores = {
+                deviceA: 67,
+                deviceB: 126,
+                deviceX: 30,    // Relatively low
+                deviceY: 55,    // Slightly better
+                deviceZ: 180    // A lot better
+            };
+
+            // Store the current displayed scores for each device.
+            // Initialize with 0 for all devices, as nothing has been clicked yet.
+            const currentScores = {
+                deviceA: 0,
+                deviceB: 0,
+                deviceX: 0,
+                deviceY: 0,
+                deviceZ: 0
+            };
+
+            // This sets the maximum value for the bar chart and for blur scaling.
+            // All bar widths and blur levels will be a percentage/inverse percentage of this value.
+            // Choose a value slightly higher than the highest expected score across ALL comparisons.
+            const maxScoreForVisualization = 200; // Covers deviceZ's 180 score
+
+            // Max blur radius in pixels (when score is 0, i.e., lowest performance)
+            const maxBlurRadius = 15; 
+            // Min blur radius in pixels (when score is maxScoreForVisualization, i.e., highest performance)
+            const minBlurRadius = 0; 
+
+            /**
+             * Animates a number from a start value to an end value over a given duration.
+             * @param {HTMLElement} element - The DOM element to update with the animating number.
+             * @param {number} start - The starting number.
+             * @param {number} end - The final number.
+             * @param {number} duration - The duration of the animation in milliseconds.
+             */
+            function animateNumber(element, start, end, duration) {
+                let startTime = null;
+
+                // Easing function for a smoother animation (quad out)
+                function easeOutQuad(t) {
+                    return t * (2 - t);
+                }
+
+                function step(currentTime) {
+                    if (!startTime) startTime = currentTime;
+                    // Calculate progress (0 to 1)
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    // Apply easing to progress
+                    const easedProgress = easeOutQuad(progress);
+                    // Calculate current value based on eased progress
+                    const currentValue = Math.floor(start + (end - start) * easedProgress);
+                    element.textContent = currentValue;
+
+                    // Continue animation if not finished
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        // Ensure the final value is exactly the end value
+                        element.textContent = end; 
+                    }
+                }
+                // Start the animation loop
+                requestAnimationFrame(step);
+            }
+
+            /**
+             * Calculates the blur radius for an image based on a given score.
+             * Lower score means higher blur (more blurry). Higher score means lower blur (sharper).
+             * @param {number} score - The Kjuber score.
+             * @returns {number} The blur radius in pixels.
+             */
+            function calculateBlur(score) {
+                // Normalize score to a 0-1 range based on maxScoreForVisualization
+                const normalizedScore = Math.min(Math.max(score, 0), maxScoreForVisualization) / maxScoreForVisualization;
+                
+                // Invert the normalized score: 0 score -> 1 (max blur), max score -> 0 (min blur)
+                const inverseNormalizedScore = 1 - normalizedScore;
+                
+                // Map the inverse normalized score to the blur range (maxBlurRadius to minBlurRadius)
+                const blurValue = minBlurRadius + (inverseNormalizedScore * (maxBlurRadius - minBlurRadius));
+                
+                return blurValue;
+            }
+
+            /**
+             * Updates the display for a device, including animating its numerical score,
+             * updating its bar chart, and updating its corresponding image blur and label.
+             * @param {HTMLElement} scoreElement - The span element displaying the numerical score.
+             * @param {HTMLElement} barElement - The div element representing the bar in the chart.
+             * @param {number} scoreValue - The actual score to display and animate to.
+             * @param {string} deviceId - The ID of the device (e.g., 'deviceA') to update its stored score and image.
+             */
+            function updateDisplay(scoreElement, barElement, scoreValue, deviceId) {
+                // Update the global stored score for this device
+                currentScores[deviceId] = scoreValue;
+
+                // Reset numerical display elements to initial state for re-animation
+                scoreElement.textContent = 0;
+                barElement.style.width = '0%';
+
+                // A small delay before starting the animation to ensure CSS transition resets.
+                setTimeout(() => {
+                    // Animate the number over 1.5 seconds
+                    animateNumber(scoreElement, 0, scoreValue, 1500); 
+                    
+                    // Calculate the bar width as a percentage of the maxScoreForVisualization
+                    const percentage = (scoreValue / maxScoreForVisualization) * 100;
+                    
+                    // Set the new width for the bar. The CSS transition handles the animation.
+                    barElement.style.width = `${percentage}%`;
+                }, 100); 
+
+                // Always update image blur and visibility if the checkbox is enabled
+                updateImageVisibilityAndBlurs();
+            }
+
+            /**
+             * Updates the visibility and blur for all images based on the checkbox state
+             * and the currentScores of each device.
+             */
+            function updateImageVisibilityAndBlurs() {
+                const isImageVisEnabled = enableImageVisCheckbox.checked;
+
+                for (const deviceId in imageElements) {
+                    if (imageElements.hasOwnProperty(deviceId)) {
+                        const { img, scoreLabel, wrapper } = imageElements[deviceId];
+                        const score = currentScores[deviceId]; // Use the currently revealed score
+
+                        if (isImageVisEnabled) {
+                            wrapper.style.display = 'flex'; // Show the image wrapper
+                            const blurPx = calculateBlur(score);
+                            img.style.filter = `blur(${blurPx}px)`;
+                            scoreLabel.textContent = score; // Update the score label under the image
+                        } else {
+                            wrapper.style.display = 'none'; // Hide the image wrapper
+                            img.style.filter = 'none'; // Remove blur when hidden for cleanliness
+                            scoreLabel.textContent = 0; // Reset score label when hidden
+                        }
+                    }
+                }
+            }
+
+            // Event listeners for the initial dual comparison buttons
+            document.getElementById('buttonA').addEventListener('click', () => {
+                updateDisplay(scoreAElement, barA, targetScores.deviceA, 'deviceA');
+            });
+
+            document.getElementById('buttonB').addEventListener('click', () => {
+                updateDisplay(scoreBElement, barB, targetScores.deviceB, 'deviceB');
+            });
+
+            // Event listener for the "Show Advanced Comparison" button
+            showTripleComparisonBtn.addEventListener('click', () => {
+                // Toggle the display of the triple comparison section
+                if (tripleComparisonSection.style.display === 'none' || tripleComparisonSection.style.display === '') {
+                    tripleComparisonSection.style.display = 'block';
+                    showTripleComparisonBtn.textContent = 'Hide Advanced Comparison';
+                } else {
+                    tripleComparisonSection.style.display = 'none';
+                    showTripleComparisonBtn.textContent = 'Show Advanced Comparison';
+                }
+            });
+
+            // Event listeners for the new triple comparison buttons
+            document.getElementById('buttonX').addEventListener('click', () => {
+                updateDisplay(scoreXElement, barX, targetScores.deviceX, 'deviceX');
+            });
+
+            document.getElementById('buttonY').addEventListener('click', () => {
+                updateDisplay(scoreYElement, barY, targetScores.deviceY, 'deviceY');
+            });
+
+            document.getElementById('buttonZ').addEventListener('click', () => {
+                updateDisplay(scoreZElement, barZ, targetScores.deviceZ, 'deviceZ');
+            });
+
+            // Event listener for the "Enable Image Visualization" checkbox
+            enableImageVisCheckbox.addEventListener('change', updateImageVisibilityAndBlurs);
+
+            // Initial call to set image visibility and blur when the page loads.
+            // Images will be hidden by default because the checkbox is unchecked by default.
+            updateImageVisibilityAndBlurs(); 
+        });
+        /* --- JAVASCRIPT END --- */
+    </script>
+</body>
+</html>
